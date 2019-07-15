@@ -1,0 +1,31 @@
+# A Vagrant box with the latest version of WordPress on Ubuntu 18.04 LTS (Bionic Beaver)
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.box_version = "20190703.0.0"
+
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  config.vm.synced_folder "resources", "/resources"
+
+  config.vm.provision "shell", inline: <<-SHELL
+     apt-get update
+     # install apache
+     apt-get install -y apache2 apache2-utils
+     rm /var/www/html/index.html
+     # install mysql
+     apt-get install -y mysql-client mysql-server
+     # install php and modules
+     apt-get install -y php7.2 php7.2-mysql libapache2-mod-php7.2 php7.2-cli php7.2-cgi php7.2-gd
+     # install wordpress
+     wget -c http://wordpress.org/latest.tar.gz
+     tar -xzvf latest.tar.gz
+     rm -r latest.tar.gz
+     rsync -av wordpress/* /var/www/html/
+     chown -R www-data:www-data /var/www/html/
+     chmod -R 755 /var/www/html/
+     # create wordpress database
+     mysql < /vagrant/resources/config_db.sql
+     cp /vagrant/resources/wp-config.php /var/www/html/wp-config.php
+  SHELL
+end
