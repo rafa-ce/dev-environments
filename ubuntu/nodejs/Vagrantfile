@@ -1,0 +1,17 @@
+# A Vagrant box with the Node.js (version 10.x) and npm on Ubuntu 18.04 LTS (Bionic Beaver)
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.box_version = "20190703.0.0"
+
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # config.vm.synced_folder "../../../repositories", "/repositories"
+
+  config.vm.provision "shell", inline: <<-SHELL
+     apt-get update
+     apt-get install curl
+     curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+     apt-get install -y nodejs
+  SHELL
+end
